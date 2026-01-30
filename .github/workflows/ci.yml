@@ -19,6 +19,14 @@ jobs:
           tools: composer:v2
           extensions: pdo_sqlite, mbstring, bcmath, ctype, fileinfo, json, openssl, tokenizer, xml
 
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('src/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
       - name: Install dependencies
         working-directory: src
         run: composer install --no-interaction --prefer-dist
@@ -26,7 +34,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: src/package-lock.json
 
       - name: Build frontend assets
         working-directory: src
