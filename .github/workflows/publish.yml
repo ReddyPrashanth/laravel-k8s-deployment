@@ -32,7 +32,7 @@ jobs:
         with:
           images: ghcr.io/ReddyPrashanth/laravel
           tags: |
-            type=sha
+            type=sha,format=short
             type=raw,value=latest
 
       - name: Build and push
@@ -41,5 +41,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
