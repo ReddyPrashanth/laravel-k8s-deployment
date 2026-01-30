@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop]
+
+jobs:
+  quality-and-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: composer:v2
+          extensions: pdo_sqlite, mbstring, bcmath, ctype, fileinfo, json, openssl, tokenizer, xml
+
+      - name: Install dependencies
+        working-directory: src
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend assets
+        working-directory: src
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare env
+        working-directory: src
+        run: |
+          cp .env.testing .env
+          php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
+          php artisan key:generate
+
+      - name: Lint (Pint)
+        working-directory: src
+        run: ./vendor/bin/pint --test
+
+      - name: Run tests
+        working-directory: src
+        run: php artisan test
