@@ -23,6 +23,17 @@ jobs:
         working-directory: src
         run: composer install --no-interaction --prefer-dist
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend assets
+        working-directory: src
+        run: |
+          npm ci
+          npm run build
+
       - name: Prepare env
         working-directory: src
         run: |
